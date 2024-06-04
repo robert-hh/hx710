@@ -48,13 +48,20 @@ class HX710:
     def is_ready(self):
         return self.pOUT() == 0
 
+    def conversion_done_cb(self, pOUT):
+        self.conversion_done = True
+        pOUT.irq(handler=None)
+
     def read(self):
+        self.conversion_done = False
+        self.pOUT.irq(trigger=Pin.IRQ_FALLING, handler=self.conversion_done_cb)
         # wait for the device being ready
         for _ in range(500):
-            if self.pOUT() == 0:
+            if self.conversion_done == True:
                 break
             time.sleep_ms(1)
         else:
+            self.pOUT.irq(handler=None)
             raise OSError("Sensor does not respond")
 
         # shift in data, and gain & channel info
