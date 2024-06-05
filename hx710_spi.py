@@ -25,12 +25,12 @@ import time
 
 
 class HX710:
-    def __init__(self, pd_sck, dout, spi, mode=1):
-        self.pSCK = pd_sck
-        self.pOUT = dout
+    def __init__(self, clock, data, spi, mode=1):
+        self.clock = clock
+        self.data = data
         self.spi = spi
 
-        self.pSCK(0)
+        self.clock(0)
 
         self.clock_25 = b'\xaa\xaa\xaa\xaa\xaa\xaa\x80'
         self.clock_26 = b'\xaa\xaa\xaa\xaa\xaa\xaa\xa0'
@@ -68,7 +68,7 @@ class HX710:
     def read(self):
         # wait for the device to get ready
         for _ in range(500):
-            if self.pOUT() == 0:
+            if self.data() == 0:
                 break
             time.sleep_ms(1)
         else:
@@ -117,8 +117,8 @@ class HX710:
             self.time_constant = time_constant
 
     def power_down(self):
-        self.pSCK.value(False)
-        self.pSCK.value(True)
+        self.clock.value(False)
+        self.clock.value(True)
 
     def power_up(self):
-        self.pSCK.value(False)
+        self.clock.value(False)

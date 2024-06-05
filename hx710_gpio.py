@@ -24,10 +24,10 @@ from machine import enable_irq, disable_irq, idle
 import time
 
 class HX710:
-    def __init__(self, pd_sck, dout, mode=1):
-        self.pSCK = pd_sck
-        self.pOUT = dout
-        self.pSCK.value(False)
+    def __init__(self, clock, data, mode=1):
+        self.clock = clock
+        self.data = data
+        self.clock.value(False)
 
         self.MODE = 1
         self.OFFSET = 0
@@ -46,32 +46,32 @@ class HX710:
         self.filtered = self.read()
 
     def is_ready(self):
-        return self.pOUT() == 0
+        return self.data() == 0
 
-    def conversion_done_cb(self, pOUT):
+    def conversion_done_cb(self, data):
         self.conversion_done = True
-        pOUT.irq(handler=None)
+        data.irq(handler=None)
 
     def read(self):
         self.conversion_done = False
-        self.pOUT.irq(trigger=Pin.IRQ_FALLING, handler=self.conversion_done_cb)
+        self.data.irq(trigger=Pin.IRQ_FALLING, handler=self.conversion_done_cb)
         # wait for the device being ready
         for _ in range(500):
             if self.conversion_done == True:
                 break
             time.sleep_ms(1)
         else:
-            self.pOUT.irq(handler=None)
+            self.data.irq(handler=None)
             raise OSError("Sensor does not respond")
 
         # shift in data, and gain & channel info
         result = 0
         for j in range(24 + self.MODE):
             state = disable_irq()
-            self.pSCK(True)
-            self.pSCK(False)
+            self.clock(True)
+            self.clock(False)
             enable_irq(state)
-            result = (result << 1) | self.pOUT()
+            result = (result << 1) | self.data()
 
         # shift back the extra bits
         result >>= self.MODE
@@ -114,8 +114,8 @@ class HX710:
             self.time_constant = time_constant
 
     def power_down(self):
-        self.pSCK.value(False)
-        self.pSCK.value(True)
+        self.clock.value(False)
+        self.clock.value(True)
 
     def power_up(self):
-        self.pSCK.value(False)
+        self.clock.value(False)
