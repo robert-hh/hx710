@@ -16,12 +16,14 @@ of the GPIO pins used for the communication. clock_pin must not be an input-only
 mode is the setting of the load cell amplifier.
 The default value of 1 also selects the external sensor.
 
-### hx710 = HX710(clock_pin, data_pin, mode=1)
+### hx710 = HX710(clock_pin, data_pin, mode=1, state_machine=0)
 
 This is the Raspberry Pi PIO constructor. data_pin and clock_pin are the pin objects
 of the GPIO pins used for the communication.
 mode is the setting of the load cell amplifier.
 The default value of 1 also selects the external sensor.
+The argument state_machine has to be set to different values if more than one
+HX711 device is used by an application.
 
 ### hx710 = HX710(clock_pin, data_pin, spi, mode=1)
 
