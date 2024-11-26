@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from machine import enable_irq, disable_irq, idle
+from machine import enable_irq, disable_irq, Pin
 import time
 
 class HX710:
@@ -36,7 +36,7 @@ class HX710:
         self.time_constant = 0.25
         self.filtered = 0
 
-        self.set_mode(mode);
+        self.set_mode(mode)
 
     def set_mode(self, mode):
         if mode in (1, 2, 3):
