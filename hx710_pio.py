@@ -69,6 +69,8 @@ class HX710:
         label("finish")
         push(block)         .side (0)   # no, deliver data and start over
 
+    def __call__(self):
+        return self.read()
 
     def set_mode(self, mode):
         if mode in (1, 2, 3):

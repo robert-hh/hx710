@@ -11,27 +11,28 @@ ready signal resulting in a more precise result.
 
 ### hx710 = HX710(clock_pin, data_pin, mode=1)
 
-This is the GPIO constructor. data_pin and clock_pin are the pin objects
-of the GPIO pins used for the communication. clock_pin must not be an input-only pin.
-mode is the setting of the load cell amplifier.
+This is the GPIO constructor. `data_pin` and `clock_pin` are the pin objects
+of the GPIO pins used for the communication. `clock_pin` must not be an input-only pin.
+`mode` is the setting of the load cell amplifier.
 The default value of 1 also selects the external sensor.
 
 ### hx710 = HX710(clock_pin, data_pin, mode=1, state_machine=0)
 
-This is the Raspberry Pi PIO constructor. data_pin and clock_pin are the pin objects
+This is the Raspberry Pi PIO constructor. `data_pin` and `clock_pin` are the pin objects
 of the GPIO pins used for the communication.
-mode is the setting of the load cell amplifier.
+`mode` is the setting of the load cell amplifier.
 The default value of 1 also selects the external sensor.
-The argument state_machine can be set to different values if conflicting with
+The argument `state_machine` can be set to different values if conflicting with
 other uses, like if than one HX710 device is used by an application.
 
 ### hx710 = HX710(clock_pin, data_pin, spi, mode=1)
 
-This is the SPI constructor. data_pin is the SPI MISO, clock_pin the SPI MOSI. These must be
-Pin objects, with data_pin defined for input, clock_pin defined as output. They must be supplied
-in addition to the spi object, even if spi uses the same  pins for miso and mosi.
-spi is the SPI object. The spi clock signal will not be be used.
-mode is the of of the load cell amplifier.
+This is the SPI constructor. `data_pin` is the SPI MISO, `clock_pin` the SPI MOSI. These must be
+Pin objects, with `data_pin` defined for input, `clock_pin` defined as output.
+They must be supplied in addition to the spi object, even if spi uses
+the same  pins for miso and mosi.
+`spi` is the SPI object. The spi clock signal will not be be used.
+`mode` is the of of the load cell amplifier.
 The default value of 1 also selects the external sensor.
 
 ## Methods
@@ -48,13 +49,14 @@ Sets the mode which is used for the next call of hx710.read()
 |3|External Sensor at 40 Hz|
 
 ### result = hx710.read()
+### result = hx710()
 
 Returns the actual raw value of the load cell. Raw means: not scaled, no offset
 compensation.
 
 ### result = hx710.read_average(times=3)
 
-Returns the raw value of the load cell as the average of times readings of The
+Returns the raw value of the load cell as the average of `times` readings of The
 raw value.
 
 ### result = hx710.read_lowpass()
@@ -79,7 +81,7 @@ hx710.set_scale().
 
 ### hx710.tare(times=15)
 
-Determine the tare value of the load cell by averaging times raw readings.
+Determine the tare value of the load cell by averaging `times` raw readings.
 
 ### hx710.power_down()
 

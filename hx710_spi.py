@@ -54,6 +54,9 @@ class HX710:
 
         self.set_gain(gain)
 
+    def __call__(self):
+        return self.read()
+
     def set_mode(self, mode):
         if mode == 1:
             self.clock = self.clock_25

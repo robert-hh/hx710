@@ -45,6 +45,9 @@ class HX710:
 
         self.set_mode(mode)
 
+    def __call__(self):
+        return self.read()
+
     def set_mode(self, mode):
         if mode in (1, 2, 3):
             self.MODE = mode
