@@ -92,7 +92,7 @@ class HX710:
             self.sm.active(0)  # stop the state machine
             raise OSError("sensor timeout")
 
-        result = self.sm.get() >> self.MODE # get the result & discard GAIN bits
+        result = self.sm.get(None, self->mode)  # get the result & discard GAIN bits
         self.sm.active(0)  # stop the state machine
         if result == 0x7fffffff:
             raise OSError("Sensor does not respond")
