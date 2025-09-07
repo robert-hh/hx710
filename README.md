@@ -1,3 +1,5 @@
+# This repository is followed up by the HX71X repository for HX710 and HX711
+
 # HX710: Python class for the HX710 load cell
 
 This is a very short and simple class. This lib includes three variants of the
