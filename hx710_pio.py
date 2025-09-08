@@ -30,7 +30,7 @@ class HX710:
         self.data = data
         self.clock.value(False)
 
-        self.MODE = 0
+        self.MODE = 1
         self.OFFSET = 0
         self.SCALE = 1
 
@@ -52,22 +52,27 @@ class HX710:
         autopush=False,
     )
     def hx710_pio():
+        label("start")
         pull()              .side (0)   # get the number of clock cycles
         mov(x, osr)         .side (0)
+        jmp(not_x, "power_down") .side (0)
         set(pindirs, 0)     .side (0)    # Initial set pin direction.
 # Wait for a high level = start of the DATA pulse
         wait(1, pin, 0)     .side (0)
 # Wait for a low level = DATA signal
         wait(0, pin, 0)     .side (0)
+        jmp(x_dec, "bitloop").side(0)   # just decrement
 
         label("bitloop")
-        nop()               .side (1)   # active edge
-        nop()               .side (1)
+        nop()               .side (1)[1]# active edge
         in_(pins, 1)        .side (0)   # get the pin and shift it in
         jmp(x_dec, "bitloop").side (0)  # test for more bits
         
-        label("finish")
         push(block)         .side (0)   # no, deliver data and start over
+        jmp("start")        .side (0)   # And start over
+
+        label("power_down")
+        jmp("power_down")   .side (1)
 
     def __call__(self):
         return self.read()
@@ -81,10 +86,11 @@ class HX710:
 
     def read(self):
         # Feed the waiting state machine & get the data
+        self.sm.restart()  # Just in case that it is not at the start.
         self.sm.active(1)  # start the state machine
-        self.sm.put(self.MODE + 24 - 1)     # set pulse count 25-27, start
+        self.sm.put(self.MODE + 24)     # set pulse count 25-27, start
         start = time.ticks_ms()
-        while time.ticks_diff(time.ticks_ms(), start) < 500:
+        while time.ticks_diff(time.ticks_ms(), start) < 1000:
             # Wait for the result
             if self.sm.rx_fifo() > 0:
                 break
@@ -92,7 +98,7 @@ class HX710:
             self.sm.active(0)  # stop the state machine
             raise OSError("sensor timeout")
 
-        result = self.sm.get(None, self->mode)  # get the result & discard GAIN bits
+        result = self.sm.get(None, self.MODE)  # get the result & discard GAIN bits
         self.sm.active(0)  # stop the state machine
         if result == 0x7fffffff:
             raise OSError("Sensor does not respond")
@@ -134,8 +140,13 @@ class HX710:
             self.time_constant = time_constant
 
     def power_down(self):
-        self.clock.value(False)
-        self.clock.value(True)
+        self.sm.restart()  # Just in case that it is not at the start.
+        self.sm.put(0)     # mode power down
+        self.sm.active(1)  # start the state machine
+        time.sleep_ms(1)
+        self.sm.active(0)  # and stop it again
 
     def power_up(self):
-        self.clock.value(False)
+        self.sm.restart()  # Just in case that it is not at the start.
+        self.sm.active(1)  # start the state machine to set clock low
+        self.sm.active(0)  # and stop it again
