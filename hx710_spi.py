@@ -35,7 +35,7 @@ class HX710:
         self.clock_25 = b'\xaa\xaa\xaa\xaa\xaa\xaa\x80'
         self.clock_26 = b'\xaa\xaa\xaa\xaa\xaa\xaa\xa0'
         self.clock_27 = b'\xaa\xaa\xaa\xaa\xaa\xaa\xa8'
-        self.clock = self.clock_25
+        self.clock_table = [None, self.clock_25, self.clock_26, self.clock_27]
         self.lookup = (b'\x00\x01\x00\x00\x02\x03\x00\x00\x00\x00\x00\x00'
                        b'\x00\x00\x00\x00\x04\x05\x00\x00\x06\x07\x00\x00'
                        b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
@@ -52,25 +52,22 @@ class HX710:
         self.time_constant = 0.1
         self.filtered = 0
 
-        self.set_gain(gain)
+        self.set_mode(mode)
 
     def __call__(self):
         return self.read()
 
     def set_mode(self, mode):
-        if mode == 1:
-            self.clock = self.clock_25
-        elif mode == 2:
-            self.clock = self.clock_26
-        elif mode == 3:
-            self.clock = self.clock_27
-
+        if mode in (1, 2, 3):
+            self.MODE = mode
+        else:
+            self.MODE = 1
         self.read()
         self.filtered = self.read()
 
     def read(self):
         # wait for the device to get ready
-        for _ in range(500):
+        for _ in range(1000):
             if self.data() == 0:
                 break
             time.sleep_ms(1)
@@ -78,7 +75,7 @@ class HX710:
             raise OSError("Sensor does not respond")
 
         # get the data and set channel and gain
-        self.spi.write_readinto(self.clock, self.in_data)
+        self.spi.write_readinto(self.clock_table[self.MODE], self.in_data)
 
         # pack the data into a single value
         result = 0
