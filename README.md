@@ -85,6 +85,23 @@ hx710.set_scale().
 
 Determine the tare value of the load cell by averaging `times` raw readings.
 
+### temperature = hx710.temperature[raw=False])
+
+Return the value of the internal temperature sensor. In order to get a °C value,
+the sensor has to be calibrated first by calling hx710.calibrate(). When `raw`
+is set to True, the raw reading us returned.
+The temperature() method returns meaningful values only for the HX710A device.
+Besides that, do not expect precision.
+
+### hx710.calibrate(ref_temp [, gain=20.4, offset=None])
+
+Calibrate the sensor. `ref_temp` is the actual temperature when calling calibrate().
+`gain` is the ratio of LSB changes/°C. According to the data sheet, the default
+value is 20.4. Offset is the ADC value offset. When omitted, the actual ADC
+reading is used as offset. This option can be used, if ref_temp is the actual
+temperature of the sensor. The values for gain and offset vary per device.
+Especially getting the proper value for gain requires some effort.
+
 ### hx710.power_down()
 
 Set the load cell to sleep mode.

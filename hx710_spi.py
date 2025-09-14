@@ -46,8 +46,14 @@ class HX710:
                        b'\x0e\x0f')
         self.in_data = bytearray(7)
 
+        self.MODE = 1
         self.OFFSET = 0
         self.SCALE = 1
+
+        # Some default values
+        self.temp_offset = 5300
+        self.temp_gain = 20.4
+        self.temp_ref = 20.8
 
         self.time_constant = 0.1
         self.filtered = 0
@@ -60,8 +66,6 @@ class HX710:
     def set_mode(self, mode):
         if mode in (1, 2, 3):
             self.MODE = mode
-        else:
-            self.MODE = 1
         self.read()
         self.filtered = self.read()
 
@@ -115,6 +119,24 @@ class HX710:
             return self.time_constant
         elif 0 < time_constant < 1.0:
             self.time_constant = time_constant
+
+    def temperature(self, raw=False):
+        mode = self.MODE
+        self.set_mode(2)  # switch to temperature mode
+        temp = self.read() >> 9 # read the temperature and scale it down
+        self.set_mode(mode)  # switch the mode back
+        if raw:
+            return temp
+        else:
+            return (temp - self.temp_offset) / self.temp_gain + self.temp_ref
+
+    def calibrate(self, ref_temp, gain=20.4, offset=None):
+        self.temp_ref = ref_temp
+        self.temp_gain = gain
+        if offset is None:
+            self.temp_offset = self.temperature(True)
+        else:
+            self.temp_offset = offset
 
     def power_down(self):
         self.clock.value(False)
